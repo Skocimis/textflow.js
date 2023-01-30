@@ -4,6 +4,8 @@
 
 ### Supported Node.js Versions
 * Node.js 14
+* Node.js 16
+* Node.js 18
 
 ## Installation
 `npm install textflow.js` or `yarn add textflow.js`
