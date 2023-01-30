@@ -1,13 +1,19 @@
 {
   "name": "textflow.js",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Node.js library that helps you send SMS using TextFlow API",
   "main": "textflow.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "sms-api"
+    "sms-api",  
+    "api-client",  
+    "api",  
+    "text-message",  
+    "simple-sms",  
+    "sms-verification",
+    "sms"
   ],
   "author": "TextFlow",
   "license": "ISC",
