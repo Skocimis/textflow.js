@@ -1,0 +1,14 @@
+{
+  "name": "textflow.js",
+  "version": "0.0.4",
+  "description": "",
+  "main": "textflow.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sms"
+  ],
+  "author": "TextFlow",
+  "license": "ISC"
+}
