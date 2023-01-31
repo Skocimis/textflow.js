@@ -70,6 +70,6 @@ async_function();
 
 ## Getting help
 
-If you need help installing or using the library, please check the [FAQ](https://textflow.me) first, and contact us at [admin@textflow.me](mailto://admin@textflow.me) if you don't find an answer to your question.
+If you need help installing or using the library, please check the [FAQ](https://textflow.me) first, and contact us at [support@textflow.me](mailto://support@textflow.me) if you don't find an answer to your question.
 
 If you've found a bug in the API, package or would like new features added, you are also free to contact us!
