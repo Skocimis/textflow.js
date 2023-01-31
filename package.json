@@ -1,6 +1,6 @@
 {
   "name": "textflow.js",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Node.js library that helps you send SMS using TextFlow API",
   "main": "textflow.js",
   "scripts": {
