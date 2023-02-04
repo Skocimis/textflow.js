@@ -12,6 +12,8 @@
 
 ## Sending an SMS
 
+To send an SMS, you have to create an API key using the [Textflow dashboard](https://textflow.me/api). When you register an account, you automatically get an API key with one free SMS which you can send anywhere.
+
 ### Just send a message
 
 ```javascript
@@ -74,11 +76,11 @@ You can also use our service to easily verify a phone number, without storing da
 
 ### Example usage
 
-Both functions can also be used both by providing a callback or awaiting its promise, just like the `sendSMS`.
+Both `sendVerificationSMS` and `verifyCode` can also be used both by providing a callback or awaiting its promise, just like the `sendSMS`.
 
 ```js
 //User has sent his phone number for verification
-textflow.sendVerificationSMS("+11234567890");
+textflow.sendVerificationSMS("+11234567890", verificationOptions);
 
 //Show him the code submission form
 //We will handle the verification code ourselves
@@ -86,6 +88,20 @@ textflow.sendVerificationSMS("+11234567890");
 //The user has submitted the code
 let result = await textflow.verifyCode("+11234567890", "USER_ENTERED_CODE"); 
 //if `result.valid` is true, then the phone number is verified. 
+```
+
+#### Verification options
+
+`VerificationOptions` the optional argument for the `sendVerificationSMS` function. It contains the parameters of the verification code that should be sent:
+
+`service_name` is what the user will see in the verification message, e. g. `"Your verification code for Guest is: CODE"`
+
+`seconds` is how many seconds the code is valid. Default is 10 minutes. Maximum is one day. 
+```js
+{
+  'service_name': 'Guest',
+  'seconds': 600
+}
 ```
 
 ## Getting help
