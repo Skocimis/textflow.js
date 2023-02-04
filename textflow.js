@@ -19,19 +19,19 @@ TextFlow.useKey = function (apiKey) {
 /**
  * Information about the delivered message
  * @typedef {Object} SendMessageData
- * @property {string} to
- * @property {string} content
- * @property {string} country_code
- * @property {number} price
- * @property {integer} timestamp
+ * @property {string} to Recipient
+ * @property {string} content Message body
+ * @property {string} country Recipient countrt 
+ * @property {number} price How much did you pay for the message
+ * @property {integer} timestamp Timestamp that contains the time the message was sent
  */
 
 /**
  * Information about the phone verification process
  * @typedef {Object} VerifyPhoneData
- * @property {string} verification_code
- * @property {integer} expires
- * @property {string} message_text
+ * @property {string} verification_code The verification code
+ * @property {integer} expires Timestamp that contains the code expiration time
+ * @property {string} message_text Full text of the message sent to the user
  */
 
 /**
@@ -53,6 +53,17 @@ TextFlow.useKey = function (apiKey) {
  */
 
 /**
+ * Result status of the TextFlow Verify phone number API call
+ * @typedef {Object} VerifyCodeResult
+ * @property {boolean} ok True if there were no errors. 
+ * @property {integer} status Status code
+ * @property {string} message Status message
+ * @property {boolean} valid True if the code the user has sent is valid, false otherwise. 
+ * @property {boolean} [valid_code] True if the code the user has sent is valid, false otherwise. 
+ * @property {integer} [expires] True if the code the user has sent is valid, false otherwise. 
+ */
+
+/**
  * Options about the verification process, including your identification, verification code length and how long is it valid for. 
  * @typedef {Object} VerificationOptions
  * @property {string} [provider] What the user will see in the verification message, if the provider is `Guest`, he would get a message: `"Your verification code for Guest is: CODE"`. Default is none. 
@@ -67,13 +78,131 @@ TextFlow.useKey = function (apiKey) {
  */
 
 /**
- * Callback function that handles the result of a sendVerificationSMS request
+ * Callback function that handles the result of a Verify phone number request
  * @callback verifyPhoneCallback
- * @param {VerifyPhoneResult} result Result status of the TextFlow Verify phone number API call as  {@link SendMessageResult}.
+ * @param {VerifyPhoneResult} result Result status of the TextFlow Verify phone number API call as  {@link VerifyPhoneResult}.
  */
 
 /**
+ * Callback function that handles the result of a Verify code request
+ * @callback verifyCodeCallback
+ * @param {VerifyCodeResult} result Result status of the TextFlow Verify code API call as  {@link VerifyCodeResult}.
+ */
+
+
+/**
+ * Verify the code that the customer has submitted
+ * @param {string} phone_number Phone number to verify, including country calling code, like `+381617581234`
+ * @param {string} code Verification code that the user has submited. 
+ * @param {verifyCodeCallback} callback Callback function that handles the result of the Verify code request
+ * @returns {Promise<VerifyCodeResult> | undefined}  If callback is specified, the function does not return anything, but instead calls it, passing it the {@link VerifyCodeResult} as an argument. Otherwise, it returns the promise of {@link VerifyCodeResult}.
+ * @example
+ * // Prior to the call of this
+ * // function, you have called the 
+ * // sendVerificationSMS and the user
+ * // has submitted the code to verify
  * 
+ *  textflow.verifyCode(
+ *      "+3811231234", "4045", 
+ *      (result)=>{
+ *          if(result.valid){
+ *              //Phone number is valid
+ *          }
+ *      })
+ */
+TextFlow.verifyCode = async function (phone_number, code, callback) {
+    if (!phone_number) {
+        let bad_phone_number = {
+            ok: false,
+            status: 400,
+            message: "You have not specified the phone number. "
+        };
+        if (callback)
+            return callback(bad_phone_number);
+        console.error(bad_phone_number.message);
+        return;
+    }
+    if (!code) {
+        let bad_code = {
+            ok: false,
+            status: 400,
+            message: "You have not specified the verification code. "
+        };
+        if (callback)
+            return callback(bad_code);
+        console.error(bad_code.message);
+        return;
+    }
+
+    if (!callback) {
+        return new Promise((resolve, reject) => {
+            TextFlow.verifyCode(phone_number, code, (result) => {
+                resolve(result);
+            });
+        })
+    }
+
+    if (!API_KEY.value) {
+        let api_key_missing = {
+            ok: false,
+            status: 400,
+            message: "You have not specified the API key. Specify it by calling the useKey function. "
+        };
+        if (!callback) {
+            console.error(api_key_missing.message);
+            return;
+        }
+        callback(api_key_missing);
+        return;
+    }
+
+    let data = JSON.stringify({ phone_number, code });
+    let reqOptions = {
+        hostname: 'textflow.me',
+        port: 443,
+        path: '/phone/check',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length,
+            'Authorization': "Bearer " + API_KEY.value
+        }
+    }
+    let req = https
+        .request(reqOptions, res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                let res = JSON.parse(data);
+                let result = {
+                    ok: res.ok,
+                    status: res.status,
+                    message: res.message,
+                    valid: res.valid
+                };
+                if (result.valid_code) {
+                    result.valid_code = res.valid_code;
+                }
+                if (result.expires) {
+                    result.expires = res.expires;
+                }
+                callback(result)
+            });
+        })
+        .on('error', err => {
+            callback({
+                ok: err.ok,
+                status: err.status,
+                message: err.message,
+                valid: res.valid
+            });
+        })
+    req.write(data);
+    req.end();
+}
+
+/**
+ * Send phone number verification SMS to your customers
  * @param {string} phone_number Phone number to verify, including country calling code, like `+381617581234`
  * @param {VerificationOptions?} options Options about the verification process, including your identification, verification code length and how long is it valid for. 
  * @param {verifyPhoneCallback?} callback Callback function that handles the result of the Verify phone number request
