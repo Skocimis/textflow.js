@@ -84,7 +84,7 @@ textflow.sendVerificationSMS("+11234567890");
 //We will handle the verification code ourselves
 
 //The user has submitted the code
-let result = await textflow.verifyCode("+11234567890", "THE_CODE_HE_ENTERED"); 
+let result = await textflow.verifyCode("+11234567890", "USER_ENTERED_CODE"); 
 //if `result.valid` is true, then the phone number is verified. 
 ```
 
