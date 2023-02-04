@@ -81,7 +81,7 @@ Both functions can also be used both by providing a callback or awaiting its pro
 textflow.sendVerificationSMS("+11234567890");
 
 //Show him the code submission form
-//We will handle the code ourselves
+//We will handle the verification code ourselves
 
 //The user has submitted the code
 let result = await textflow.verifyCode("+11234567890", "THE_CODE_HE_ENTERED"); 
