@@ -21,7 +21,7 @@ TextFlow.useKey = function (apiKey) {
  * @typedef {Object} SendMessageData
  * @property {string} to Recipient
  * @property {string} content Message body
- * @property {string} country Recipient countrt 
+ * @property {string} country Recipient country
  * @property {number} price How much did you pay for the message
  * @property {integer} timestamp Timestamp that contains the time the message was sent
  */
