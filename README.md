@@ -10,7 +10,7 @@
 ## Installation
 `npm install textflow.js` or `yarn add textflow.js`
 
-## Sample Usage
+## Sending an SMS
 
 ### Just send a message
 
@@ -66,6 +66,26 @@ async_function();
     "status": 404,
     "message": "API key not found"
 }
+```
+
+## Verifying a phone number
+
+You can also use our service to easily verify a phone number, without storing data about the phones that you are about to verify, because we can do it for you.
+
+### Example usage
+
+Both functions can also be used both by providing a callback or awaiting its promise, just like the `sendSMS`.
+
+```js
+//User has sent his phone number for verification
+textflow.sendVerificationSMS("+11234567890");
+
+//Show him the code submission form
+//We will handle the code ourselves
+
+//The user has submitted the code
+let result = await textflow.verifyCode("+11234567890", "THE_CODE_HE_ENTERED"); 
+//if `result.valid` is true, then the phone number is verified. 
 ```
 
 ## Getting help
