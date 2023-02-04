@@ -19,7 +19,7 @@ TextFlow.useKey = function (apiKey) {
 /**
  * Information about the delivered message
  * @typedef {Object} SendMessageData
- * @property {string} to Recipient
+ * @property {string} to Recipient phone number
  * @property {string} content Message body
  * @property {string} country Recipient country
  * @property {number} price How much did you pay for the message
@@ -66,9 +66,8 @@ TextFlow.useKey = function (apiKey) {
 /**
  * Options about the verification process, including your identification, verification code length and how long is it valid for. 
  * @typedef {Object} VerificationOptions
- * @property {string} [provider] What the user will see in the verification message, if the provider is `Guest`, he would get a message: `"Your verification code for Guest is: CODE"`. Default is none. 
- * @property {number} [minutes] How many minutes is the code valid for. Default is 30. Maximum is one day (or 1440 minutes). 
- * @property {integer} [code_length] How many digits will the code have. Default is 4 and the allowed values are [1, 10]. 
+ * @property {string} [service_name] What the user will see in the verification message, if the `service_name` is `"Guest"`, they would get the message: `"Your verification code for Guest is: CODE"`. Default is none. 
+ * @property {integer} [seconds] How many seconds is the code valid for. Default is 10 minutes. Maximum is one day. 
  */
 
 /**
@@ -111,29 +110,6 @@ TextFlow.useKey = function (apiKey) {
  *      })
  */
 TextFlow.verifyCode = async function (phone_number, code, callback) {
-    if (!phone_number) {
-        let bad_phone_number = {
-            ok: false,
-            status: 400,
-            message: "You have not specified the phone number. "
-        };
-        if (callback)
-            return callback(bad_phone_number);
-        console.error(bad_phone_number.message);
-        return;
-    }
-    if (!code) {
-        let bad_code = {
-            ok: false,
-            status: 400,
-            message: "You have not specified the verification code. "
-        };
-        if (callback)
-            return callback(bad_code);
-        console.error(bad_code.message);
-        return;
-    }
-
     if (!callback) {
         return new Promise((resolve, reject) => {
             TextFlow.verifyCode(phone_number, code, (result) => {
@@ -142,25 +118,37 @@ TextFlow.verifyCode = async function (phone_number, code, callback) {
         })
     }
 
+    if (!phone_number) {
+        let bad_phone_number = {
+            ok: false,
+            status: 400,
+            message: "You have not specified the phone number. "
+        };
+        return callback(bad_phone_number);
+    }
+    if (!code) {
+        let bad_code = {
+            ok: false,
+            status: 400,
+            message: "You have not specified the verification code. "
+        };
+        return callback(bad_code);
+    }
+
     if (!API_KEY.value) {
         let api_key_missing = {
             ok: false,
             status: 400,
             message: "You have not specified the API key. Specify it by calling the useKey function. "
         };
-        if (!callback) {
-            console.error(api_key_missing.message);
-            return;
-        }
-        callback(api_key_missing);
-        return;
+        return callback(api_key_missing);
     }
 
     let data = JSON.stringify({ phone_number, code });
     let reqOptions = {
         hostname: 'textflow.me',
         port: 443,
-        path: '/phone/check',
+        path: '/api/verify-code',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -177,24 +165,23 @@ TextFlow.verifyCode = async function (phone_number, code, callback) {
                 let result = {
                     ok: res.ok,
                     status: res.status,
-                    message: res.message,
-                    valid: res.valid
+                    message: res.message
                 };
-                if (result.valid_code) {
+                if (res.valid_code) {
                     result.valid_code = res.valid_code;
                 }
-                if (result.expires) {
+                if (res.expires) {
                     result.expires = res.expires;
                 }
                 callback(result)
             });
         })
         .on('error', err => {
+            console.log("EVO ERR");
             callback({
                 ok: err.ok,
                 status: err.status,
-                message: err.message,
-                valid: res.valid
+                message: err.message
             });
         })
     req.write(data);
@@ -224,18 +211,6 @@ TextFlow.verifyCode = async function (phone_number, code, callback) {
  * 
  */
 TextFlow.sendVerificationSMS = async function (phone_number, options, callback) {
-    if (!phone_number) {
-        let bad_phone_number = {
-            ok: false,
-            status: 400,
-            message: "You have not specified the phone number. "
-        };
-        if (callback)
-            return callback(bad_phone_number);
-        console.error(bad_phone_number.message);
-        return;
-    }
-
     if (!callback) {
         return new Promise((resolve, reject) => {
             TextFlow.sendVerificationSMS(phone_number, options, (result) => {
@@ -244,32 +219,35 @@ TextFlow.sendVerificationSMS = async function (phone_number, options, callback) 
         })
     }
 
+    if (!phone_number) {
+        let bad_phone_number = {
+            ok: false,
+            status: 400,
+            message: "You have not specified the phone number. "
+        };
+        return callback(bad_phone_number);
+    }
+
     if (!API_KEY.value) {
         let api_key_missing = {
             ok: false,
             status: 400,
             message: "You have not specified the API key. Specify it by calling the useKey function. "
         };
-        if (!callback) {
-            console.error(api_key_missing.message);
-            return;
-        }
-        callback(api_key_missing);
-        return;
+        return callback(api_key_missing);
     }
 
 
     let data = JSON.stringify({
         phone_number,
-        provider: options?.provider,
-        minutes: options?.minutes,
-        code_length: options?.code_length,
+        service_name: options?.service_name,
+        seconds: options?.seconds
     });
 
     let reqOptions = {
         hostname: 'textflow.me',
         port: 443,
-        path: '/phone/verify',
+        path: '/api/send-code',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -308,7 +286,7 @@ TextFlow.sendVerificationSMS = async function (phone_number, options, callback) 
 
 /**
 * Method that is used to send an SMS. 
-* @param {string} recipient Recipient phone number, including country calling code, like `+381617581234`
+* @param {string} phone_number Recipient phone number, including country calling code, like `+381617581234`
 * @param {string} text Message body
 * @param {sendSMSCallback?} callback Callback function that handles the result of the Send SMS request
 * @returns {Promise<SendMessageResult> | undefined} If callback is specified, the function does not return anything, but instead calls it, passing it the {@link SendMessageResult} as an argument. Otherwise, it returns the promise of {@link SendMessageResult}.
@@ -324,17 +302,22 @@ TextFlow.sendVerificationSMS = async function (phone_number, options, callback) 
     });
 */
 
-TextFlow.sendSMS = async function (recipient, text, callback) {
-    if (!recipient) {
-        let bad_recipient = {
+TextFlow.sendSMS = async function (phone_number, text, callback) {
+    if (!callback) {
+        return new Promise((resolve, reject) => {
+            TextFlow.sendSMS(phone_number, text, (result) => {
+                resolve(result);
+            });
+        })
+    }
+
+    if (!phone_number) {
+        let bad_phone_number = {
             ok: false,
             status: 400,
-            message: "You have not specified the recipient. "
+            message: "You have not specified the recipient phone number. "
         };
-        if (callback)
-            return callback(bad_recipient);
-        console.error(bad_recipient.message);
-        return;
+        return callback(bad_phone_number);
     }
     if (!text) {
         let bad_text = {
@@ -342,17 +325,7 @@ TextFlow.sendSMS = async function (recipient, text, callback) {
             status: 400,
             message: "You have not specified the message body. "
         };
-        if (callback)
-            return callback(bad_text);
-        console.error(bad_text.message);
-        return;
-    }
-    if (!callback) {
-        return new Promise((resolve, reject) => {
-            TextFlow.sendSMS(recipient, text, (result) => {
-                resolve(result);
-            });
-        })
+        return callback(bad_text);
     }
     if (!API_KEY.value) {
         let api_key_missing = {
@@ -360,18 +333,13 @@ TextFlow.sendSMS = async function (recipient, text, callback) {
             status: 400,
             message: "You have not specified the API key. Specify it by calling the useKey function. "
         };
-        if (!callback) {
-            console.error(api_key_missing.message);
-            return;
-        }
-        callback(api_key_missing);
-        return;
+        return callback(api_key_missing);
     }
-    let data = JSON.stringify({ recipient, text });
+    let data = JSON.stringify({ phone_number, text });
     let reqOptions = {
         hostname: 'textflow.me',
         port: 443,
-        path: '/messages/send',
+        path: '/api/send-sms',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

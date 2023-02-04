@@ -97,10 +97,10 @@ let result = await textflow.verifyCode("+11234567890", "USER_ENTERED_CODE");
 `service_name` is what the user will see in the verification message, e. g. `"Your verification code for Guest is: CODE"`
 
 `seconds` is how many seconds the code is valid. Default is 10 minutes. Maximum is one day. 
-```js
+```json
 {
-  'service_name': 'Guest',
-  'seconds': 600
+  "service_name": "Guest",
+  "seconds": 600
 }
 ```
 
