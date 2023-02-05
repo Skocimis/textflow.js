@@ -53,7 +53,7 @@ TextFlow.useKey = function (apiKey) {
  */
 
 /**
- * Result status of the TextFlow Verify phone number API call
+ * Result status of the TextFlow Verify code API call
  * @typedef {Object} VerifyCodeResult
  * @property {boolean} ok True if there were no errors. 
  * @property {integer} status Status code
