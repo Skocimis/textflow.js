@@ -152,7 +152,6 @@ TextFlow.verifyCode = async function (phone_number, code, callback) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Content-Length': data.length,
             'Authorization': "Bearer " + API_KEY.value
         }
     }
@@ -165,7 +164,8 @@ TextFlow.verifyCode = async function (phone_number, code, callback) {
                 let result = {
                     ok: res.ok,
                     status: res.status,
-                    message: res.message
+                    message: res.message,
+                    valid: res.valid
                 };
                 if (res.valid_code) {
                     result.valid_code = res.valid_code;
@@ -251,7 +251,6 @@ TextFlow.sendVerificationSMS = async function (phone_number, options, callback) 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Content-Length': data.length,
             'Authorization': "Bearer " + API_KEY.value
         }
     }
@@ -343,7 +342,6 @@ TextFlow.sendSMS = async function (phone_number, text, callback) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Content-Length': data.length,
             'Authorization': "Bearer " + API_KEY.value
         }
     }
